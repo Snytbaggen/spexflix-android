@@ -1,0 +1,53 @@
+[
+  {
+    "year": 2020,
+    "title": "Marco Polos Japanska Resor",
+    "alternateTitle": "Kejsaren och Stormtrupperna",
+    "posterUrl": "https://wiki.studentspex.se/images/thumb/9/95/AffischSpex81.jpg"
+  },
+  {
+    "year": 2019,
+    "title": "Den Idustriella Evolutionen",
+    "alternateTitle": "En ljussaga",
+    "posterUrl": "https://wiki.studentspex.se/images/thumb/9/95/AffischSpex81.jpg",
+    "info": "Lorem ipsum, dolor sit amet..."
+  },
+  {
+    "year": 2018,
+    "title": "Staten och Idealet",
+    "alternateTitle": "Idévärldarnas krig",
+    "posterUrl": "https://wiki.studentspex.se/images/thumb/9/95/AffischSpex81.jpg",
+    "videoUrl": "https://spexflix.studentspex.se/uploads/1981/Spex1981.webm",
+    "runtime" : "2h 01m",
+    "info": "Lorem ipsum, dolor sit amet..."
+  },
+  {
+    "year": 2017,
+    "title": "Påvarna och Troföljden",
+    "alternateTitle": "En revisionsberättelse",
+    "posterUrl": "https://wiki.studentspex.se/images/thumb/9/95/AffischSpex81.jpg",
+    "info": "Lorem ipsum, dolor sit amet..."
+  },
+  {
+    "year": 2016,
+    "title": "Lawrence i Mumiedalen",
+    "alternateTitle": "Imperiets Kolonitlott",
+    "posterUrl": "https://wiki.studentspex.se/images/thumb/9/95/AffischSpex81.jpg",
+    "videoUrl": "https://spexflix.studentspex.se/uploads/1981/Spex1981.webm",
+    "runtime" : "2h 01m"
+  },
+  {
+    "year": 2015,
+    "title": "Jeanne D'arc",
+    "alternateTitle": "En snabblektion i Ängelska",
+    "posterUrl": "https://wiki.studentspex.se/images/thumb/9/95/AffischSpex81.jpg"
+  },
+  {
+    "year": 1981,
+    "title": "Göta Kanal",
+    "posterUrl": "https://wiki.studentspex.se/images/thumb/9/95/AffischSpex81.jpg",
+    "videoUrl": "https://spexflix.studentspex.se/uploads/1981/Spex1981.webm",
+    "runtime" : "2h 01m",
+    "info": "Lorem ipsum, dolor sit amet..."
+  }
+]

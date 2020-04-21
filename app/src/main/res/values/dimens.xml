@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="horizontal_edge_space">16dp</dimen>
+    <dimen name="video_card_left_text_margin">8dp</dimen>
+    <dimen name="video_card_bottom_margin">8dp</dimen>
+    <dimen name="video_card_top_margin">20dp</dimen>
+</resources>
