@@ -44,13 +44,11 @@ public class ShowDetailsFragment extends Fragment {
         if (data != null) {
             title.setText(data.getTitle());
 
-            alternateTitle.setText(data.getAlternateTitle());
+            alternateTitle.setText(data.getSubtitle());
 
-            Integer yearInteger = data.getYear();
-            String yearString = yearInteger == null ? "" : Integer.toString(yearInteger);
-            year.setText(yearString);
+            year.setText(data.getShortName());
 
-            info.setText(data.getInfo());
+            info.setText(data.getInformation());
         }
     }
 }

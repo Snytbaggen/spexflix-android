@@ -1,55 +1,55 @@
 package se.liss.spexflix.data;
 
-public class ShowData {
-    private final Integer year;
-    private final String title;
-    private final String alternateTitle;
-    private final String posterUrl;
-    private final String videoUrl;
-    private final String subtitleUrl;
-    private final String runtime;
-    private final String info;
+import com.google.gson.annotations.SerializedName;
 
-    public ShowData(String title, String alternateTitle, Integer year, String posterUrl, String videoUrl, String subtitleUrl, String runtime, String info) {
-        this.year = year;
+import java.util.List;
+
+public class ShowData {
+    private final Integer id;
+    @SerializedName("short_name")
+    private final String shortName;
+    private final String title;
+    private final String subtitle;
+    @SerializedName("poster_image")
+    private final String posterUrl;
+    private final String information;
+    private final List<ShowVideo> videos;
+
+    public ShowData(Integer id, String shortName, String title, String subtitle, String posterUrl, String information, List<ShowVideo> videos) {
+        this.id = id;
+        this.shortName = shortName;
         this.title = title;
-        this.alternateTitle = alternateTitle;
+        this.subtitle = subtitle;
         this.posterUrl = posterUrl;
-        this.videoUrl = videoUrl;
-        this.subtitleUrl = subtitleUrl;
-        this.runtime = runtime;
-        this.info = info;
+        this.information = information;
+        this.videos = videos;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public String getAlternateTitle() {
-        return alternateTitle;
+    public String getSubtitle() {
+        return subtitle;
     }
 
-    public Integer getYear() {
-        return year;
+    public String getShortName() {
+        return shortName;
     }
 
     public String getPosterUrl() {
         return posterUrl;
     }
 
-    public String getVideoUrl() {
-        return videoUrl;
+    public String getInformation() {
+        return information;
     }
 
-    public String getSubtitleUrl() {
-        return subtitleUrl;
-    }
-
-    public String getRuntime() {
-        return runtime;
-    }
-
-    public String getInfo() {
-        return info;
+    public List<ShowVideo> getVideos() {
+        return videos;
     }
 }

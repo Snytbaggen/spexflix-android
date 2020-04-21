@@ -21,7 +21,12 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import se.liss.spexflix.R;
+import se.liss.spexflix.data.ApiInterface;
+import se.liss.spexflix.data.ApiService;
 import se.liss.spexflix.data.ShowData;
 import se.liss.spexflix.videoCard.VideoCardAdapter;
 import se.liss.spexflix.videoCard.VideoCardDecorator;
@@ -31,8 +36,11 @@ public class ShowPickerFragment extends Fragment {
     private Context context;
     private MainListener listener;
 
+    private ApiInterface apiInterface;
+
     public ShowPickerFragment(MainListener listener) {
         this.listener = listener;
+        this.apiInterface = ApiService.getInstance();
     }
 
     @Nullable
@@ -54,33 +62,20 @@ public class ShowPickerFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        Gson gson = new Gson();
-        String jsonString = null;
-        AssetManager assetManager = context.getAssets();
-        try {
-            for (String asset : assetManager.list("")) {
-                if (asset.endsWith(".json")) {
-                    InputStream is = getContext().getAssets().open(asset);
-
-                    int size = is.available();
-                    byte[] buffer = new byte[size];
-                    is.read(buffer);
-                    is.close();
-
-                    jsonString = new String(buffer, "UTF-8");
-                    break;
-                }
+        apiInterface.getProductions().enqueue(new Callback<List<ShowData>>() {
+            @Override
+            public void onResponse(Call<List<ShowData>> call, Response<List<ShowData>> response) {
+                if (response.isSuccessful())
+                    adapter.setData(response.body());
+                else
+                    Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
             }
 
-            if (jsonString != null) {
-                Type showDataType = new TypeToken<List<ShowData>>() {}.getType();
-                List<ShowData> dataList = gson.fromJson(jsonString, showDataType);
-                adapter.setData(dataList);
+            @Override
+            public void onFailure(Call<List<ShowData>> call, Throwable t) {
+                Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            Toast.makeText(context, "Load error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
+        });
     }
 
 }

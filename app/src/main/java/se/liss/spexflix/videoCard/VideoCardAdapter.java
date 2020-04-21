@@ -15,6 +15,7 @@ import java.util.List;
 import se.liss.spexflix.MainListener;
 import se.liss.spexflix.R;
 import se.liss.spexflix.data.ShowData;
+import se.liss.spexflix.data.ShowVideo;
 
 public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickListener {
     private Context context;
@@ -59,23 +60,26 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
         VideoCardViewHolder holder = (VideoCardViewHolder)rawHolder;
         ShowData show = data.get(position);
 
-        Integer year = show.getYear();
-        String yearString = year == null ? "" : Integer.toString(year);
-        holder.setYear(yearString);
+        holder.setYear(show.getShortName());
 
         holder.setPosterImage(show.getPosterUrl());
 
         holder.setTitle(show.getTitle());
 
-        holder.setAlternatTitle(show.getAlternateTitle());
+        holder.setAlternatTitle(show.getSubtitle());
 
-        holder.setDuration(show.getRuntime());
+        holder.setDuration(null);
 
-        holder.setSubtitlesEnabled(show.getSubtitleUrl() != null);
+        List<ShowVideo> videos = show.getVideos();
+        ShowVideo video = videos == null ? null : videos.get(0);
 
-        holder.setVideoEnabled(show.getVideoUrl() != null);
+        List<String> subtitles = video == null ? null : video.getSubtitles();
+        holder.setSubtitlesEnabled(subtitles != null && subtitles.size() > 0);
 
-        holder.setInfoEnabled(show.getInfo() != null);
+        String videoUrl = video == null ? null : video.getVideoFile();
+        holder.setVideoEnabled(videoUrl != null);
+
+        holder.setInfoEnabled(show.getInformation() != null);
     }
 
     @Override
