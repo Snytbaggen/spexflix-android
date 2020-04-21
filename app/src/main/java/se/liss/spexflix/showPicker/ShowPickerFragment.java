@@ -25,9 +25,15 @@ import se.liss.spexflix.R;
 import se.liss.spexflix.data.ShowData;
 import se.liss.spexflix.videoCard.VideoCardAdapter;
 import se.liss.spexflix.videoCard.VideoCardDecorator;
+import se.liss.spexflix.MainListener;
 
 public class ShowPickerFragment extends Fragment {
     private Context context;
+    private MainListener listener;
+
+    public ShowPickerFragment(MainListener listener) {
+        this.listener = listener;
+    }
 
     @Nullable
     @Override
@@ -43,6 +49,7 @@ public class ShowPickerFragment extends Fragment {
 
         RecyclerView recyclerView = getView().findViewById(R.id.main_recycler_view);
         VideoCardAdapter adapter = new VideoCardAdapter(context);
+        adapter.setListener(listener);
         recyclerView.addItemDecoration(new VideoCardDecorator(context));
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -76,9 +83,4 @@ public class ShowPickerFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-    }
 }

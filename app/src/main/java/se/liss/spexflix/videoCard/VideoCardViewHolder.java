@@ -22,8 +22,15 @@ public class VideoCardViewHolder extends RecyclerView.ViewHolder{
     private View videoIndicator;
     private View infoIndicator;
 
-    public VideoCardViewHolder(@NonNull View itemView) {
+    private CardClickListener listener;
+
+    public VideoCardViewHolder(@NonNull final View itemView) {
         super(itemView);
+
+        itemView.setOnClickListener(v -> {
+            if (listener != null)
+                listener.onCardClicked(itemView);
+        });
 
         posterImage = itemView.findViewById(R.id.video_card_poster_image);
         year = itemView.findViewById(R.id.video_card_year_text);
@@ -32,11 +39,20 @@ public class VideoCardViewHolder extends RecyclerView.ViewHolder{
         duration = itemView.findViewById(R.id.video_card_duration);
 
         playButton = itemView.findViewById(R.id.video_card_play_button);
+        playButton.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onCardPlayClicked(itemView);
+            }
+        });
         subtitlesIndicator = itemView.findViewById(R.id.video_card_subtitle_indicator);
         videoIndicator = itemView.findViewById(R.id.video_card_video_indicator);
         infoIndicator = itemView.findViewById(R.id.video_card_info_indicator);
 
         posterImage.setClipToOutline(true);
+    }
+
+    public void setListener(CardClickListener listener) {
+        this.listener = listener;
     }
 
     public void setTitle(String title) {
