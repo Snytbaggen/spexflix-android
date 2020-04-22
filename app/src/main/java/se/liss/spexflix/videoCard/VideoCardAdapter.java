@@ -71,7 +71,9 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
         holder.setDuration(null);
 
         List<ShowVideo> videos = show.getVideos();
-        ShowVideo video = videos == null ? null : videos.get(0);
+        ShowVideo video = null;
+        if (videos != null && !videos.isEmpty())
+            video = videos.get(0);
 
         List<String> subtitles = video == null ? null : video.getSubtitles();
         holder.setSubtitlesEnabled(subtitles != null && subtitles.size() > 0);
@@ -79,7 +81,7 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
         String videoUrl = video == null ? null : video.getVideoFile();
         holder.setVideoEnabled(videoUrl != null);
 
-        holder.setInfoEnabled(show.getInformation() != null);
+        holder.setInfoEnabled(show.getInformation() != null && !show.getInformation().isEmpty());
     }
 
     @Override

@@ -22,7 +22,8 @@ public class MainActivity extends FragmentActivity implements MainListener {
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        ShowPickerFragment newFragment = new ShowPickerFragment(this);
+        ShowPickerFragment newFragment = new ShowPickerFragment();
+        newFragment.setListener(this);
         transaction.replace(R.id.main_fragment, newFragment);
         transaction.commit();
     }

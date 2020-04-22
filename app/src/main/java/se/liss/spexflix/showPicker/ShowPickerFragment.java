@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -38,9 +39,14 @@ public class ShowPickerFragment extends Fragment {
 
     private ApiInterface apiInterface;
 
-    public ShowPickerFragment(MainListener listener) {
-        this.listener = listener;
+    private List<ShowData> data;
+
+    public ShowPickerFragment() {
         this.apiInterface = ApiService.getInstance();
+    }
+
+    public void setListener(MainListener listener) {
+        this.listener = listener;
     }
 
     @Nullable
@@ -62,20 +68,22 @@ public class ShowPickerFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        apiInterface.getProductions().enqueue(new Callback<List<ShowData>>() {
-            @Override
-            public void onResponse(Call<List<ShowData>> call, Response<List<ShowData>> response) {
-                if (response.isSuccessful())
-                    adapter.setData(response.body());
-                else
-                    Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
-            }
+        if (data == null) {
+            apiInterface.getProductions().enqueue(new Callback<List<ShowData>>() {
+                @Override
+                public void onResponse(Call<List<ShowData>> call, Response<List<ShowData>> response) {
+                    if (response.isSuccessful())
+                        adapter.setData(response.body());
+                    else
+                        Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
+                }
 
-            @Override
-            public void onFailure(Call<List<ShowData>> call, Throwable t) {
-                Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<List<ShowData>> call, Throwable t) {
+                    Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
 }

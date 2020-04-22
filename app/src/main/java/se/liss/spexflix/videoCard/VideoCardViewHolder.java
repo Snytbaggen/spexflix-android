@@ -1,6 +1,7 @@
 package se.liss.spexflix.videoCard;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -8,7 +9,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
+import com.bumptech.glide.load.model.LazyHeaders;
+
 import se.liss.spexflix.R;
+import se.liss.spexflix.utils.GlideApp;
+import se.liss.spexflix.utils.GlideRequests;
 
 public class VideoCardViewHolder extends RecyclerView.ViewHolder{
     private ImageView posterImage;
@@ -22,10 +30,15 @@ public class VideoCardViewHolder extends RecyclerView.ViewHolder{
     private View videoIndicator;
     private View infoIndicator;
 
+    GlideRequests glide;
+
     private CardClickListener listener;
 
     public VideoCardViewHolder(@NonNull final View itemView) {
         super(itemView);
+
+        Context context = itemView.getContext();
+        glide = GlideApp.with(context);
 
         itemView.setOnClickListener(v -> {
             if (listener != null)
@@ -95,6 +108,8 @@ public class VideoCardViewHolder extends RecyclerView.ViewHolder{
 
     public void setPosterImage(String posterUrl) {
         // TODO: Fix this when Glide is in place
-        posterImage.setImageDrawable(posterImage.getContext().getDrawable(R.drawable.dummy_poster));
+
+        glide.load(posterUrl).into(posterImage);
+        //posterImage.setImageDrawable(posterImage.getContext().getDrawable(R.drawable.dummy_poster));
     }
 }
