@@ -64,6 +64,7 @@ public class SpexflixGlideModule extends AppGlideModule {
         protected Headers getHeaders(String s, int width, int height, Options options) {
             // TODO: Account stuff
             return super.getHeaders(s, width, height, options);}
+        }
 
         @Override
         public boolean handles(@NonNull String s) {

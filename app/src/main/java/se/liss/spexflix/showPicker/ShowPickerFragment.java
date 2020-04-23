@@ -28,6 +28,7 @@ import retrofit2.Response;
 import se.liss.spexflix.R;
 import se.liss.spexflix.data.ApiInterface;
 import se.liss.spexflix.data.ApiService;
+import se.liss.spexflix.data.DataFetcher;
 import se.liss.spexflix.data.ShowData;
 import se.liss.spexflix.videoCard.VideoCardAdapter;
 import se.liss.spexflix.videoCard.VideoCardDecorator;
@@ -37,13 +38,10 @@ public class ShowPickerFragment extends Fragment {
     private Context context;
     private MainListener listener;
 
-    private ApiInterface apiInterface;
+    private DataFetcher fetcher;
 
+    private VideoCardAdapter adapter;
     private List<ShowData> data;
-
-    public ShowPickerFragment() {
-        this.apiInterface = ApiService.getInstance();
-    }
 
     public void setListener(MainListener listener) {
         this.listener = listener;
@@ -60,30 +58,20 @@ public class ShowPickerFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         context = getContext();
+        this.fetcher = DataFetcher.getInstance(context);
 
         RecyclerView recyclerView = getView().findViewById(R.id.main_recycler_view);
-        VideoCardAdapter adapter = new VideoCardAdapter(context);
+        adapter = new VideoCardAdapter(context);
         adapter.setListener(listener);
         recyclerView.addItemDecoration(new VideoCardDecorator(context));
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        if (data == null) {
-            apiInterface.getProductions().enqueue(new Callback<List<ShowData>>() {
-                @Override
-                public void onResponse(Call<List<ShowData>> call, Response<List<ShowData>> response) {
-                    if (response.isSuccessful())
-                        adapter.setData(response.body());
-                    else
-                        Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
-                }
+        updateData();
+    }
 
-                @Override
-                public void onFailure(Call<List<ShowData>> call, Throwable t) {
-                    Toast.makeText(context, "oops", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+    public void updateData() {
+        fetcher.getShowData(false, data -> adapter.setData(data));
     }
 
 }

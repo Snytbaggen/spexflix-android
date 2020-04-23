@@ -1,6 +1,9 @@
 package se.liss.spexflix.utils;
 
+import android.accounts.AccountManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,10 +16,15 @@ import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 
+import java.io.IOException;
 import java.io.InputStream;
+
+import se.liss.spexflix.account.SpexflixAccountAuthenticator;
 
 public class GlideHeaderLoader extends BaseGlideUrlLoader<String> {
     private Context context;
+    private android.os.Handler handler = new Handler(Looper.getMainLooper());
+    private AccountManager accountManager;
 
     protected GlideHeaderLoader(ModelLoader<GlideUrl, InputStream> concreteLoader) {
         super(concreteLoader);
@@ -28,7 +36,7 @@ public class GlideHeaderLoader extends BaseGlideUrlLoader<String> {
 
     public void setContext(Context context) {
         this.context = context;
-        // TODO: Account stuff
+        accountManager = AccountManager.get(context);
     }
 
     @Override
@@ -39,7 +47,15 @@ public class GlideHeaderLoader extends BaseGlideUrlLoader<String> {
     @Nullable
     @Override
     protected Headers getHeaders(String s, int width, int height, Options options) {
-        return new LazyHeaders.Builder().addHeader("Authorization", "Basic U255dGJhZ2dlbjpYNDJhQm42Nw==").build();
+        try {
+            String authToken = SpexflixAccountAuthenticator.getAuthToken(accountManager, handler);
+            if (authToken != null)
+                return new LazyHeaders.Builder().addHeader("Authorization", "Basic " + authToken).build();
+        } catch (IOException e) {
+            // Do nothing
+        }
+
+        return super.getHeaders(s, width, height, options);
     }
 
     @Override
