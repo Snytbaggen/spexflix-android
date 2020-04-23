@@ -5,14 +5,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
+    <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/show_detail_player"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="16:9"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:text="This is where I'd put my player \n\n IF I HAD ONE "
         android:gravity="center"
         android:background="@color/black"/>
     
