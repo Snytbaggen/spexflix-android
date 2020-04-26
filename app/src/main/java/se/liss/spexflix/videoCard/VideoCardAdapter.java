@@ -104,6 +104,14 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
 
     @Override
     public void onCardPlayClicked(View v) {
-        Toast.makeText(context, "Not implemented yet!", Toast.LENGTH_SHORT).show();
+        if (recyclerView == null)
+            return;
+
+        int position = recyclerView.getChildAdapterPosition(v);
+        if (position < 0 || position >= data.size())
+            return;
+
+        if (listener != null)
+            listener.onPlayClicked(data.get(position));
     }
 }

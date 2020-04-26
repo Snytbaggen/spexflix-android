@@ -52,4 +52,11 @@ public class ShowData {
     public List<ShowVideo> getVideos() {
         return videos;
     }
+
+    public ShowVideo getVideo(int position) {
+        if (videos == null || videos.isEmpty() || position < 0 || position >= videos.size())
+            return null;
+
+        return videos.get(position);
+    }
 }
