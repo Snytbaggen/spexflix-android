@@ -6,6 +6,7 @@ import java.util.List;
 
 public class ShowData {
     private final Integer id;
+    private final Integer year;
     @SerializedName("short_name")
     private final String shortName;
     private final String title;
@@ -15,8 +16,9 @@ public class ShowData {
     private final String information;
     private final List<ShowVideo> videos;
 
-    public ShowData(Integer id, String shortName, String title, String subtitle, String posterUrl, String information, List<ShowVideo> videos) {
+    public ShowData(Integer id, Integer year, String shortName, String title, String subtitle, String posterUrl, String information, List<ShowVideo> videos) {
         this.id = id;
+        this.year = year;
         this.shortName = shortName;
         this.title = title;
         this.subtitle = subtitle;
@@ -27,6 +29,10 @@ public class ShowData {
 
     public Integer getId() {
         return id;
+    }
+
+    public Integer getYear() {
+        return year;
     }
 
     public String getTitle() {

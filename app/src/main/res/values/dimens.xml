@@ -9,6 +9,6 @@
     <dimen name="video_card_image_height">96dp</dimen>
     <dimen name="video_card_image_width">68dp</dimen>
 
-    <dimen name="video_extra_card_height">85dp</dimen>
+    <dimen name="video_extra_card_height">95dp</dimen>
     <dimen name="video_extra_card_vertical_margin">1dp</dimen>
 </resources>

@@ -19,6 +19,7 @@ import java.util.List;
 import se.liss.spexflix.MainListener;
 import se.liss.spexflix.R;
 import se.liss.spexflix.data.ShowData;
+import se.liss.spexflix.data.ShowSubtitle;
 import se.liss.spexflix.data.ShowVideo;
 
 public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickListener {
@@ -97,7 +98,7 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
             holder.setVideoNumberText("");
         }
 
-        List<String> subtitles = video == null ? null : video.getSubtitles();
+        List<ShowSubtitle> subtitles = video == null ? null : video.getSubtitles();
         holder.setSubtitlesEnabled(subtitles != null && subtitles.size() > 0);
 
         String videoUrl = video == null ? null : video.getVideoFile();
