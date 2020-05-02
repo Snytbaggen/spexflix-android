@@ -10,10 +10,10 @@ public class ShowVideo {
     private final String videoFile;
     private final String information;
     @SerializedName("video_type")
-    private final String videoType; //TODO
+    private final ShowType videoType;
     private final List<String> subtitles; //TODO
 
-    public ShowVideo(String title, String videoFile, String information, String videoType, List<String> subtitles) {
+    public ShowVideo(String title, String videoFile, String information, ShowType videoType, List<String> subtitles) {
         this.title = title;
         this.videoFile = videoFile;
         this.information = information;
@@ -29,7 +29,7 @@ public class ShowVideo {
         return information;
     }
 
-    public String getVideoType() {
+    public ShowType getVideoType() {
         return videoType;
     }
 

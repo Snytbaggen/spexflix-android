@@ -4,4 +4,11 @@
     <dimen name="video_card_left_text_margin">8dp</dimen>
     <dimen name="video_card_bottom_margin">8dp</dimen>
     <dimen name="video_card_top_margin">20dp</dimen>
+
+    <dimen name="video_card_height">104dp</dimen>
+    <dimen name="video_card_image_height">96dp</dimen>
+    <dimen name="video_card_image_width">68dp</dimen>
+
+    <dimen name="video_extra_card_height">85dp</dimen>
+    <dimen name="video_extra_card_vertical_margin">1dp</dimen>
 </resources>

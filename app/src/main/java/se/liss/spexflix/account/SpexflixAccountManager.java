@@ -52,6 +52,10 @@ public class SpexflixAccountManager {
         accountManager.addAccount(SpexflixAccountAuthenticator.ACCOUNT_TYPE, SpexflixAccountAuthenticator.AUTH_TOKEN_TYPE, null, null, launchActivity, null, handler);
     }
 
+    public void removeCurrentAccount() {
+        removeAccount(account.getValue());
+    }
+
     public void removeAccount(Account account) {
         accountManager.removeAccountExplicitly(account);
     }

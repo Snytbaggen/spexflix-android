@@ -1,12 +1,16 @@
 package se.liss.spexflix.videoCard;
 
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -58,6 +62,7 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder rawHolder, int position) {
         VideoCardViewHolder holder = (VideoCardViewHolder)rawHolder;
+
         ShowData show = data.get(position);
 
         holder.setYear(show.getShortName());
@@ -68,12 +73,29 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
 
         holder.setAlternatTitle(show.getSubtitle());
 
-        holder.setDuration(null);
-
         List<ShowVideo> videos = show.getVideos();
         ShowVideo video = null;
-        if (videos != null && !videos.isEmpty())
-            video = videos.get(0);
+
+        RecyclerView recyclerView = holder.itemView.findViewById(R.id.video_card_alternate_content_list);
+        if (videos != null && !videos.isEmpty()) {
+            video = videos.get(0); // TODO: Get preferred video
+        }
+
+        holder.setDuration(video == null ? "" : video.getVideoType().toString());
+
+        if (videos != null && videos.size() > 1) {
+            VideoCardAlternateContentAdapter adapter = new VideoCardAlternateContentAdapter(context);
+            adapter.setData(videos); // TODO: Don't include preferred video
+            recyclerView.setAdapter(adapter);
+            recyclerView.addItemDecoration(new VideoCardAlternateContentDecorator(context));
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+            holder.setHasExtraData(true, videos.size());
+            holder.setVideoNumberText(context.getString(R.string.x_videos, videos.size()));
+        } else {
+            holder.setHasExtraData(false, 0);
+            holder.setVideoNumberText("");
+        }
 
         List<String> subtitles = video == null ? null : video.getSubtitles();
         holder.setSubtitlesEnabled(subtitles != null && subtitles.size() > 0);

@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -43,6 +44,8 @@ public class ShowPickerFragment extends Fragment {
     private VideoCardAdapter adapter;
     private List<ShowData> data;
 
+    private SwipeRefreshLayout refreshLayout;
+
     public void setListener(MainListener listener) {
         this.listener = listener;
     }
@@ -50,7 +53,15 @@ public class ShowPickerFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.show_picker_fragment, container, false);
+        View v = inflater.inflate(R.layout.show_picker_fragment, container, false);
+        refreshLayout = v.findViewById(R.id.show_refresh_layout);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateData(true);
+            }
+        });
+        return v;
     }
 
     @Override
@@ -67,11 +78,15 @@ public class ShowPickerFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        updateData();
+        updateData(false);
     }
 
-    public void updateData() {
-        fetcher.getShowData(false, data -> adapter.setData(data));
+    public void updateData(boolean force) {
+        fetcher.getShowData(force, data -> {
+            if (refreshLayout != null)
+                refreshLayout.setRefreshing(false);
+            adapter.setData(data);
+        });
     }
 
 }

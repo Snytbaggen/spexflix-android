@@ -1,115 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
     android:background="@color/lissDarkBlue">
 
-    <TextView
-        android:id="@+id/login_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="60dp"
-        android:fontFamily="@font/gillies_gothic"
-        android:textColor="@color/white"
-        android:textSize="72sp"
-        android:text="Spexflix"/>
 
-    <TextView
-        android:id="@+id/login_username_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_logo"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="@dimen/horizontal_edge_space"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:fontFamily="sans-serif-medium"
-        android:text="Användarnamn"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/login_username_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_username_title"
-        android:layout_marginStart="@dimen/horizontal_edge_space"
-        android:layout_marginEnd="@dimen/horizontal_edge_space"
-        android:layout_marginTop="8dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:background="@drawable/login_text_field_bg"
-        android:textColor="@color/black"
-        tools:text="Snytbaggen"/>
+        <TextView
+            android:id="@+id/login_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="60dp"
+            android:fontFamily="@font/gillies_gothic"
+            android:textColor="@color/white"
+            android:textSize="72sp"
+            android:text="Spexflix"/>
 
-    <TextView
-        android:id="@+id/login_password_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_username_text"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="@dimen/horizontal_edge_space"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:fontFamily="sans-serif-medium"
-        android:text="Lösenord"/>
+        <TextView
+            android:id="@+id/login_username_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login_logo"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="@dimen/horizontal_edge_space"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Användarnamn"/>
 
-    <EditText
-        android:id="@+id/login_password_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_password_title"
-        android:layout_marginStart="@dimen/horizontal_edge_space"
-        android:layout_marginEnd="@dimen/horizontal_edge_space"
-        android:layout_marginTop="8dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:background="@drawable/login_text_field_bg"
-        android:textColor="@color/black"
-        android:inputType="textPassword"
-        tools:text="Ett lösenord"/>
+        <EditText
+            android:id="@+id/login_username_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login_username_title"
+            android:layout_marginStart="@dimen/horizontal_edge_space"
+            android:layout_marginEnd="@dimen/horizontal_edge_space"
+            android:layout_marginTop="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="@drawable/login_text_field_bg"
+            android:textColor="@color/black"
+            tools:text="Snytbaggen"/>
 
-    <TextView
-        android:id="@+id/login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_password_text"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/login_button_bg"
-        android:textColor="@color/black"
-        android:textSize="24sp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:text="Logga in"/>
+        <TextView
+            android:id="@+id/login_password_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login_username_text"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="@dimen/horizontal_edge_space"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Lösenord"/>
 
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="100dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:text="Det här är en app för internt bruk av medlemmar i Linköpings Studentspex. Vill du veta mer kan du surfa till studentspex.se"/>
+        <EditText
+            android:id="@+id/login_password_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login_password_title"
+            android:layout_marginStart="@dimen/horizontal_edge_space"
+            android:layout_marginEnd="@dimen/horizontal_edge_space"
+            android:layout_marginTop="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="@drawable/login_text_field_bg"
+            android:textColor="@color/black"
+            android:inputType="textPassword"
+            tools:text="Ett lösenord"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login_password_text"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/login_button_bg"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="Logga in"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login_button"
+            android:layout_marginTop="100dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:paddingBottom="60dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:text="Det här är en app för internt bruk av medlemmar i Linköpings Studentspex. Vill du veta mer kan du surfa till studentspex.se"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,6 +1,8 @@
 package se.liss.spexflix.showDetails;
 
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,18 +10,20 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
@@ -31,7 +35,12 @@ import se.liss.spexflix.account.SpexflixAccountAuthenticator;
 import se.liss.spexflix.data.ShowData;
 import se.liss.spexflix.data.ShowVideo;
 
-public class ShowDetailsFragment extends Fragment {
+public class PlayerFragment extends Fragment {
+    public static final String ARG_START_PLAYBACK = "start_playback";
+    public static final String ARG_ENTER_FULLSCREEN = "enter_fullscreen";
+    public static final String ARG_VIDEO_INDEX = "video_id";
+    public static final int NO_ID = -1;
+
     private ShowData data;
 
     private TextView title;
@@ -44,10 +53,16 @@ public class ShowDetailsFragment extends Fragment {
 
     private int oldOrientation = Configuration.ORIENTATION_UNDEFINED;
 
+    private boolean immediatePlayback;
+    private boolean enterFullscreen;
+    private int videoId;
+    private int savedOrientation;
+
     public void setData(ShowData data) {
         this.data = data;
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -57,6 +72,18 @@ public class ShowDetailsFragment extends Fragment {
         year = v.findViewById(R.id.show_detail_year);
         info = v.findViewById(R.id.show_detail_info);
         playerView = v.findViewById(R.id.show_detail_player);
+
+        immediatePlayback = getArguments().getBoolean(ARG_START_PLAYBACK, false);
+        enterFullscreen = getArguments().getBoolean(ARG_ENTER_FULLSCREEN, false);
+        videoId = getArguments().getInt(ARG_VIDEO_INDEX, NO_ID);
+
+        if (enterFullscreen || getActivity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+            enableFullscreen();
+
+        if (enterFullscreen) {
+            savedOrientation = getActivity().getRequestedOrientation();
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
 
         return v;
     }
@@ -84,7 +111,7 @@ public class ShowDetailsFragment extends Fragment {
                 Uri videoUri = Uri.parse(videoUrl);
 
                 player = new SimpleExoPlayer.Builder(getContext()).build();
-                player.setPlayWhenReady(false);
+                player.setPlayWhenReady(immediatePlayback);
                 playerView.setPlayer(player);
 
                 Handler handler = new Handler();
@@ -94,7 +121,7 @@ public class ShowDetailsFragment extends Fragment {
                         AccountManager manager = AccountManager.get(getContext());
                         String authToken = SpexflixAccountAuthenticator.getAuthToken(manager, handler);
 
-                        DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "Speflix"));
+                        DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "Spexflix"));
                         dataSourceFactory.getDefaultRequestProperties().set("Authorization", "Basic " + authToken);
                         MediaSource videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
                                 .createMediaSource(videoUri);
@@ -111,6 +138,9 @@ public class ShowDetailsFragment extends Fragment {
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
+        if (enterFullscreen)
+            return; // We handle this case in other ways
+
         if (newConfig.orientation != oldOrientation) {
             oldOrientation = newConfig.orientation;
 
@@ -122,7 +152,7 @@ public class ShowDetailsFragment extends Fragment {
         }
     }
 
-    private void enableFullscreen() {
+    public void enableFullscreen() {
         View decorView = getActivity().getWindow().getDecorView();
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_IMMERSIVE
@@ -137,16 +167,19 @@ public class ShowDetailsFragment extends Fragment {
 
         ViewGroup.LayoutParams layoutParams =  playerView.getLayoutParams();
         layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        playerView.setLayoutParams(layoutParams);
     }
 
-    private void disableFullscreen() {
+    public void disableFullscreen() {
         View decorView = getActivity().getWindow().getDecorView();
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
         ViewGroup.LayoutParams layoutParams =  playerView.getLayoutParams();
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        playerView.setLayoutParams(layoutParams);
     }
 
     @Override
@@ -155,6 +188,10 @@ public class ShowDetailsFragment extends Fragment {
         if (player != null) {
             player.stop();
             player.release();
+        }
+        if (enterFullscreen) {
+            disableFullscreen();
+            getActivity().setRequestedOrientation(savedOrientation);
         }
     }
 }
