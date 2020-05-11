@@ -17,8 +17,27 @@ import se.liss.spexflix.data.ShowVideo;
 
 public class VideoCardAlternateContentAdapter extends RecyclerView.Adapter implements CardClickListener {
     private Context context;
+    private RecyclerView recyclerView;
+
+    private Listener listener;
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.recyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        this.recyclerView = null;
+    }
 
     List<ShowVideo> data;
+
+    public interface Listener {
+        void onVideoClicked(ShowVideo video, boolean play);
+    }
 
     public VideoCardAlternateContentAdapter(Context context) {
         this.context = context;
@@ -30,6 +49,10 @@ public class VideoCardAlternateContentAdapter extends RecyclerView.Adapter imple
         if (data != null)
             this.data.addAll(data);
         notifyDataSetChanged();
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -59,11 +82,27 @@ public class VideoCardAlternateContentAdapter extends RecyclerView.Adapter imple
 
     @Override
     public void onCardClicked(View v) {
-        Toast.makeText(context, "Card clicked", Toast.LENGTH_SHORT).show();
+        if (recyclerView == null)
+            return;
+
+        int position = recyclerView.getChildAdapterPosition(v);
+        if (position < 0 || position >= data.size())
+            return;
+
+        if (listener != null)
+            listener.onVideoClicked(data.get(position), false);
     }
 
     @Override
     public void onCardPlayClicked(View v) {
-        Toast.makeText(context, "Play clicked", Toast.LENGTH_SHORT).show();
+        if (recyclerView == null)
+            return;
+
+        int position = recyclerView.getChildAdapterPosition(v);
+        if (position < 0 || position >= data.size())
+            return;
+
+        if (listener != null)
+            listener.onVideoClicked(data.get(position), true);
     }
 }

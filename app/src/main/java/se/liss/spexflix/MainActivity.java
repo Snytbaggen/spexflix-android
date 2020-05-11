@@ -2,33 +2,28 @@ package se.liss.spexflix;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.mediarouter.app.MediaRouteButton;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toolbar;
+import android.view.WindowManager;
 
-import com.google.android.exoplayer2.Player;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastState;
-import com.google.android.material.navigation.NavigationView;
 
-import se.liss.spexflix.account.LoginActivity;
 import se.liss.spexflix.account.SpexflixAccountManager;
 import se.liss.spexflix.cast.CastLoader;
 import se.liss.spexflix.data.ShowData;
@@ -39,27 +34,29 @@ public class MainActivity extends AppCompatActivity implements MainListener {
     private SpexflixAccountManager accountManager;
 
     private Fragment currentFragment;
+    private View fragmentContainer;
 
     private CastContext castContext;
     private MediaRouteButton castButton;
 
-    private DrawerLayout drawer;
+    private DrawerLayout rootView;
 
-    //private View toolbar;
+    private View toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
         setContentView(R.layout.activity_main);
 
         accountManager = SpexflixAccountManager.getInstance(this);
         accountManager.getCurrentAccount().observe(this, this::checkLogin);
 
-        drawer = findViewById(R.id.drawer_layout);
-        ActionBar toolbar = getSupportActionBar();
-        toolbar.setDisplayShowCustomEnabled(true);
-        toolbar.setBackgroundDrawable(getDrawable(R.drawable.toolbar_background));
-        toolbar.setCustomView(R.layout.custom_toolbar);
+        rootView = findViewById(R.id.drawer_layout);
+        toolbar = findViewById(R.id.toolbar_layout);
+        fragmentContainer = findViewById(R.id.main_fragment);
 
         View hamburgerButton = findViewById(R.id.hamburger_button);
         hamburgerButton.setOnClickListener(v -> toggleDrawer());
@@ -70,14 +67,14 @@ public class MainActivity extends AppCompatActivity implements MainListener {
             closeDrawer();
         });
 
+        calculateBottomPadding();
 
-        drawer.closeDrawer(GravityCompat.START);
+        rootView.closeDrawer(GravityCompat.START);
 
         castContext = CastContext.getSharedInstance(this);
         castButton = findViewById(R.id.cast_button);
 
         CastButtonFactory.setUpMediaRouteButton(this, castButton);
-
 
         FragmentManager manager = getSupportFragmentManager();
         currentFragment = savedInstanceState == null ? null : manager.getFragment(savedInstanceState, "currentFragment");
@@ -97,6 +94,17 @@ public class MainActivity extends AppCompatActivity implements MainListener {
         //toolbar = findViewById(R.id.main_toolbar);
     }
 
+    public void calculateBottomPadding() {
+        int bottomPadding = 0;
+        Resources resources = getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            bottomPadding = resources.getDimensionPixelSize(resourceId);
+            getWindow().setNavigationBarColor(Color.WHITE);
+        }
+        fragmentContainer.setPadding(0, 0, 0, bottomPadding);
+    }
+
     public void onSaveInstanceState(@NonNull Bundle outState){
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment);
         if (fragment != null)
@@ -106,13 +114,13 @@ public class MainActivity extends AppCompatActivity implements MainListener {
 
 
     @Override
-    public void onCardClicked(ShowData showData) {
-        changeToPlayerFragment(showData, false, false, PlayerFragment.NO_ID);
+    public void onCardClicked(ShowData showData, int videoIndex) {
+        changeToPlayerFragment(showData, false, false, videoIndex);
 
     }
 
     @Override
-    public void onPlayClicked(ShowData showData) {
+    public void onPlayClicked(ShowData showData, int videoIndex) {
         if (castContext.getCastState() == CastState.CONNECTED) {
             CastSession session = castContext.getSessionManager().getCurrentCastSession();
             if (session != null) {
@@ -121,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements MainListener {
             }
         }
 
-        changeToPlayerFragment(showData, true, true, PlayerFragment.NO_ID);
+        changeToPlayerFragment(showData, true, true, videoIndex);
 
     }
 
@@ -145,10 +153,40 @@ public class MainActivity extends AppCompatActivity implements MainListener {
         currentFragment = newFragment;
     }
 
+    public void enableFullscreen() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+                        // Set the content to appear under the system bars so that the
+                        // content doesn't resize when the system bars hide and show.
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        // Hide the nav bar and status bar
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+        toolbar.setVisibility(View.GONE);
+        //rootView.setFitsSystemWindows(false);
+
+        fragmentContainer.setPadding(0, 0, 0, 0);
+    }
+
+    public void disableFullscreen() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        toolbar.setVisibility(View.VISIBLE);
+        //rootView.setFitsSystemWindows(true);
+
+        calculateBottomPadding();
+    }
+
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        drawer.requestLayout();
+        rootView.requestLayout();
 
         /*if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && currentFragment instanceof PlayerFragment)
             toolbar.setVisibility(View.GONE);
@@ -158,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements MainListener {
 
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (rootView.isDrawerOpen(GravityCompat.START)) {
             closeDrawer();
             return;
         }
@@ -197,15 +235,15 @@ public class MainActivity extends AppCompatActivity implements MainListener {
     }
 
     private void closeDrawer() {
-        drawer.closeDrawer(GravityCompat.START);
+        rootView.closeDrawer(GravityCompat.START);
     }
 
     private void openDrawer() {
-        drawer.openDrawer(GravityCompat.START);
+        rootView.openDrawer(GravityCompat.START);
     }
 
     private void toggleDrawer() {
-        if (drawer.isDrawerOpen(GravityCompat.START))
+        if (rootView.isDrawerOpen(GravityCompat.START))
             closeDrawer();
         else
             openDrawer();

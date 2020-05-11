@@ -10,14 +10,10 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -30,6 +26,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
 import java.util.List;
 
+import se.liss.spexflix.MainActivity;
 import se.liss.spexflix.R;
 import se.liss.spexflix.account.SpexflixAccountAuthenticator;
 import se.liss.spexflix.data.ShowData;
@@ -39,14 +36,17 @@ public class PlayerFragment extends Fragment {
     public static final String ARG_START_PLAYBACK = "start_playback";
     public static final String ARG_ENTER_FULLSCREEN = "enter_fullscreen";
     public static final String ARG_VIDEO_INDEX = "video_id";
-    public static final int NO_ID = -1;
+    public static final int DEFAULT_INDEX = 0;
 
     private ShowData data;
 
     private TextView title;
     private TextView alternateTitle;
     private TextView year;
+    private TextView name;
     private TextView info;
+    private TextView videoInfo;
+    private TextView videoTitle;
 
     private PlayerView playerView;
     private SimpleExoPlayer player;
@@ -67,15 +67,18 @@ public class PlayerFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.show_detail_fragment, container, false);
-        title = v.findViewById(R.id.show_detail_title);
-        alternateTitle = v.findViewById(R.id.show_detail_alternate_title);
-        year = v.findViewById(R.id.show_detail_year);
-        info = v.findViewById(R.id.show_detail_info);
-        playerView = v.findViewById(R.id.show_detail_player);
+        title = v.findViewById(R.id.production_detail_title);
+        alternateTitle = v.findViewById(R.id.production_detail_alternate_title);
+        year = v.findViewById(R.id.production_detail_year);
+        name = v.findViewById(R.id.production_detail_name);
+        info = v.findViewById(R.id.production_detail_info);
+        videoInfo = v.findViewById(R.id.production_detail_video_info);
+        videoTitle = v.findViewById(R.id.production_detail_video_title);
+        playerView = v.findViewById(R.id.video_player);
 
         immediatePlayback = getArguments().getBoolean(ARG_START_PLAYBACK, false);
         enterFullscreen = getArguments().getBoolean(ARG_ENTER_FULLSCREEN, false);
-        videoId = getArguments().getInt(ARG_VIDEO_INDEX, NO_ID);
+        videoId = getArguments().getInt(ARG_VIDEO_INDEX, DEFAULT_INDEX);
 
         if (enterFullscreen || getActivity().getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
             enableFullscreen();
@@ -98,14 +101,28 @@ public class PlayerFragment extends Fragment {
 
         alternateTitle.setText(data.getSubtitle());
 
-        year.setText(data.getShortName());
+        name.setText(data.getShortName());
+
+        Integer productionYear = data.getYear();
+        String yearString = productionYear == null ? "Okänt" : productionYear.toString();
+        year.setText(yearString);
 
         info.setText(data.getInformation());
 
         if (data.getVideos() != null && !data.getVideos().isEmpty()) {
             List<ShowVideo> videos = data.getVideos();
-            // TODO: Pick video depending on kind
-            ShowVideo video = videos.get(0);
+            ShowVideo video = videos.get(videoId);
+
+            videoTitle.setText(video.getTitle());
+
+            String description = video.getInformation();
+            if (description == null || description.isEmpty()) {
+                videoInfo.setVisibility(View.GONE);
+            } else {
+                videoInfo.setText(description);
+                videoInfo.setVisibility(View.VISIBLE);
+            }
+
             String videoUrl = video.getVideoFile();
             if (videoUrl != null) {
                 Uri videoUri = Uri.parse(videoUrl);
@@ -142,28 +159,18 @@ public class PlayerFragment extends Fragment {
             return; // We handle this case in other ways
 
         if (newConfig.orientation != oldOrientation) {
-            oldOrientation = newConfig.orientation;
 
-            if (oldOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 enableFullscreen();
             } else {
                 disableFullscreen();
             }
+            oldOrientation = newConfig.orientation;
         }
     }
 
     public void enableFullscreen() {
-        View decorView = getActivity().getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE
-                        // Set the content to appear under the system bars so that the
-                        // content doesn't resize when the system bars hide and show.
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        // Hide the nav bar and status bar
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        ((MainActivity)getActivity()).enableFullscreen();
 
         ViewGroup.LayoutParams layoutParams =  playerView.getLayoutParams();
         layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -171,15 +178,12 @@ public class PlayerFragment extends Fragment {
     }
 
     public void disableFullscreen() {
-        View decorView = getActivity().getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        ((MainActivity)getActivity()).disableFullscreen();
 
         ViewGroup.LayoutParams layoutParams =  playerView.getLayoutParams();
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         playerView.setLayoutParams(layoutParams);
+        getView().invalidate();
     }
 
     @Override

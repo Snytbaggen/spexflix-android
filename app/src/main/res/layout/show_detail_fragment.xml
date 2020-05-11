@@ -6,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/show_detail_player"
+        android:id="@+id/video_player"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="16:9"
@@ -14,61 +14,113 @@
         app:layout_constraintStart_toStartOf="parent"
         android:gravity="center"
         android:background="@color/black"/>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/show_detail_player"
-        app:layout_constraintStart_toStartOf="parent"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@drawable/show_detail_background">
-        
-        <TextView
-            android:id="@+id/show_detail_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:fontFamily="sans-serif-black"
-            tools:text="Marco Polos Japanska Resor" />
 
-        <TextView
-            android:id="@+id/show_detail_alternate_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            tools:text="eller Kejsaren och Stormtrupperna" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/video_player"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/production_detail_background">
+
             <TextView
+                android:id="@+id/production_detail_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
+                android:textSize="24sp"
                 android:fontFamily="sans-serif-black"
-                android:text="Uppsättningsår: "/>
+                tools:text="Marco Polos Japanska Resor" />
 
             <TextView
-                android:id="@+id/show_detail_year"
+                android:id="@+id/production_detail_alternate_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
-                tools:text="2020"/>
-        </LinearLayout>
+                android:textSize="18sp"
+                tools:text="eller Kejsaren och Stormtrupperna" />
 
-        <TextView
-            android:id="@+id/show_detail_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textColor="@color/black"
-            tools:text="@string/lipsum"/>
-        
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Produktionsår: "/>
+
+
+                <TextView
+                    android:id="@+id/production_detail_year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    tools:text="2020"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Uppsättningsnamn: "/>
+
+                <TextView
+                    android:id="@+id/production_detail_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    tools:text="2020"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/production_detail_video_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/black"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="18sp"
+                tools:text="Videotitel"/>
+
+            <TextView
+                android:id="@+id/production_detail_video_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                tools:text="@string/lipsum"/>
+
+            <TextView
+                android:text="Om uppsättningen"
+                android:textColor="@color/black"
+                android:layout_marginTop="12dp"
+                android:layout_width="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="18sp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/production_detail_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                tools:text="@string/lipsum"/>
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

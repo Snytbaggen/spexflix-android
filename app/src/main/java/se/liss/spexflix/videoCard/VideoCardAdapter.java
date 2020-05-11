@@ -35,6 +35,12 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
         this.recyclerView = recyclerView;
     }
 
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        this.recyclerView = null;
+    }
+
     public VideoCardAdapter(Context context) {
         this.context = context;
         this.data = new ArrayList<>();
@@ -87,6 +93,16 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
         if (videos != null && videos.size() > 1) {
             VideoCardAlternateContentAdapter adapter = new VideoCardAlternateContentAdapter(context);
             adapter.setData(videos); // TODO: Don't include preferred video
+            adapter.setListener((clickedVideo, play) -> {
+                if (listener == null)
+                    return;
+
+                int videoIndex = videos.indexOf(clickedVideo);
+                if (play)
+                    listener.onPlayClicked(show, videoIndex);
+                else
+                    listener.onCardClicked(show, videoIndex);
+            });
             recyclerView.setAdapter(adapter);
             recyclerView.addItemDecoration(new VideoCardAlternateContentDecorator(context));
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -122,7 +138,7 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
             return;
 
         if (listener != null)
-            listener.onCardClicked(data.get(position));
+            listener.onCardClicked(data.get(position), 0); // TODO: Preferred video
     }
 
     @Override
@@ -135,6 +151,6 @@ public class VideoCardAdapter extends RecyclerView.Adapter implements CardClickL
             return;
 
         if (listener != null)
-            listener.onPlayClicked(data.get(position));
+            listener.onPlayClicked(data.get(position), 0); // TODO: Preferred video
     }
 }
