@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "6544018834",
+    "firebase_url": "https://spexflix-92be4.firebaseio.com",
+    "project_id": "spexflix-92be4",
+    "storage_bucket": "spexflix-92be4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:6544018834:android:9c3cc04ce0f025d3aa454b",
+        "android_client_info": {
+          "package_name": "se.liss.spexflix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "6544018834-c4sr4hepbuin89ome9p7iip74hdirv3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHquRev_ZxNxf3RDCyTkrVCZTXgKJVqXw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "6544018834-c4sr4hepbuin89ome9p7iip74hdirv3s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,7 @@ package se.liss.spexflix;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -11,22 +12,34 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.mediarouter.app.MediaRouteButton;
 
 import android.accounts.Account;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastState;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigValue;
+import com.google.gson.Gson;
+
+import java.util.Map;
 
 import se.liss.spexflix.account.SpexflixAccountManager;
 import se.liss.spexflix.cast.CastLoader;
 import se.liss.spexflix.data.ShowData;
+import se.liss.spexflix.data.VersionInformation;
 import se.liss.spexflix.showDetails.PlayerFragment;
 import se.liss.spexflix.showPicker.ShowPickerFragment;
 
@@ -42,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements MainListener {
     private DrawerLayout rootView;
 
     private View toolbar;
+
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +106,51 @@ public class MainActivity extends AppCompatActivity implements MainListener {
         }
 
 
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        mFirebaseRemoteConfig.fetchAndActivate()
+                .addOnCompleteListener(this, task -> {
+                    if (!task.isSuccessful())
+                        return;
+
+                    Map<String, FirebaseRemoteConfigValue> values = mFirebaseRemoteConfig.getAll();
+                    if (values.isEmpty())
+                        return;
+
+                    FirebaseRemoteConfigValue versionInformationValue = values.get("version_check");
+                    if (versionInformationValue == null)
+                        return;
+
+                    String versionInformationString = versionInformationValue.asString();
+                    if (versionInformationString.isEmpty())
+                        return;
+
+                    Gson gson = new Gson();
+                    VersionInformation information = gson.fromJson(versionInformationString, VersionInformation.class);
+
+                    if (information == null)
+                        return;
+
+                    if (BuildConfig.VERSION_CODE >= information.getLatestBuild())
+                        return;
+
+                    displayUpdateDialog(information.getBuildUrl(), information.getBuildMessage());
+                });
+
         //toolbar = findViewById(R.id.main_toolbar);
+    }
+
+    private void displayUpdateDialog(String url, String message) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setCancelable(true);
+    builder.setMessage(message != null ? message : "Det har kommit en ny version av appen! Ladda ner den snarast för att få en bättre spexupplevelse");
+    builder.setTitle("Ny version!");
+    builder.setPositiveButton("Ladda ner nu" , (dialog, which) -> {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://haggmyr.se/daniel/spexflix-apk/downloadpage.html"));
+        startActivity(browserIntent);
+        dialog.dismiss();
+    });
+    builder.setNegativeButton("Kanske senare", (dialog, which) -> dialog.dismiss());
+    builder.show();
     }
 
     public void calculateBottomPadding() {
