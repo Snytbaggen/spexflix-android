@@ -16,20 +16,28 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.SingleSampleMediaSource;
+import com.google.android.exoplayer2.text.Subtitle;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 import se.liss.spexflix.MainActivity;
 import se.liss.spexflix.R;
 import se.liss.spexflix.account.SpexflixAccountAuthenticator;
 import se.liss.spexflix.data.ShowData;
+import se.liss.spexflix.data.ShowSubtitle;
 import se.liss.spexflix.data.ShowVideo;
 
 public class PlayerFragment extends Fragment {
@@ -125,7 +133,6 @@ public class PlayerFragment extends Fragment {
 
             String videoUrl = video.getVideoFile();
             if (videoUrl != null) {
-                Uri videoUri = Uri.parse(videoUrl);
 
                 player = new SimpleExoPlayer.Builder(getContext()).build();
                 player.setPlayWhenReady(immediatePlayback);
@@ -133,16 +140,40 @@ public class PlayerFragment extends Fragment {
 
                 Handler handler = new Handler();
 
+                // Needs to be in a new thread because we're accessing AccountManager
                 new Thread(() -> {
                     try {
                         AccountManager manager = AccountManager.get(getContext());
                         String authToken = SpexflixAccountAuthenticator.getAuthToken(manager, handler);
-
                         DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "Spexflix"));
                         dataSourceFactory.getDefaultRequestProperties().set("Authorization", "Basic " + authToken);
-                        MediaSource videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+
+                        Uri videoUri = Uri.parse(videoUrl);
+                        List<ShowSubtitle> subtitles = video.getSubtitles();
+                        int numberOfTracks = 1 + (subtitles == null ? 0 : subtitles.size());
+
+                        MediaSource source = new ProgressiveMediaSource.Factory(dataSourceFactory)
                                 .createMediaSource(videoUri);
-                        handler.post(() -> {player.prepare(videoSource);});
+
+                        if (numberOfTracks > 1) {
+                            // TODO: Multiple subtitles and subtitle styling
+                            ShowSubtitle subtitle = subtitles.get(0);
+                            Format subtitleFormat = Format.createTextSampleFormat(
+                                    null,
+                                    MimeTypes.TEXT_VTT,
+                                    C.SELECTION_FLAG_DEFAULT,
+                                    subtitle.getName());
+
+                            Uri subtitleUri = Uri.parse(subtitle.getSubtitleFile());
+
+                            MediaSource subtitleMediaSource = new SingleSampleMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(subtitleUri, subtitleFormat, C.TIME_UNSET);
+                            source = new MergingMediaSource(source, subtitleMediaSource);
+                        }
+
+                        final MediaSource finalSource = source;
+
+                        handler.post(() -> {player.prepare(finalSource);});
                     } catch (IOException e) {
                         // TODO: Error handling
                     }
