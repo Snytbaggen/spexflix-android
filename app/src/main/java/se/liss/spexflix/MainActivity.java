@@ -175,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements MainListener {
     @Override
     public void onCardClicked(ShowData showData, int videoIndex) {
         changeToPlayerFragment(showData, false, false, videoIndex);
-
     }
 
     @Override
