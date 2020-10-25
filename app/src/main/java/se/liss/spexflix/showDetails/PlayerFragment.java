@@ -29,13 +29,16 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 
+import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationService;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
 import se.liss.spexflix.MainActivity;
 import se.liss.spexflix.R;
-import se.liss.spexflix.account.SpexflixAccountAuthenticator;
+import se.liss.spexflix.account.AuthStateManager;
 import se.liss.spexflix.data.ShowData;
 import se.liss.spexflix.data.ShowSubtitle;
 import se.liss.spexflix.data.ShowVideo;
@@ -47,6 +50,8 @@ public class PlayerFragment extends Fragment {
     public static final int DEFAULT_INDEX = 0;
 
     private ShowData data;
+
+    private AuthorizationService mAuthService;
 
     private TextView title;
     private TextView alternateTitle;
@@ -96,7 +101,66 @@ public class PlayerFragment extends Fragment {
             getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
 
+        mAuthService = new AuthorizationService(this.getContext());
+
         return v;
+    }
+
+    public void prepareVideo(String accessToken, String idToken, AuthorizationException ex) {
+        List<ShowVideo> videos = data.getVideos();
+        ShowVideo video = videos.get(videoId);
+
+        videoTitle.setText(video.getTitle());
+
+        String description = video.getInformation();
+        if (description == null || description.isEmpty()) {
+            videoInfo.setVisibility(View.GONE);
+        } else {
+            videoInfo.setText(description);
+            videoInfo.setVisibility(View.VISIBLE);
+        }
+
+        String videoUrl = video.getVideoFile();
+        if (videoUrl != null) {
+
+            player = new SimpleExoPlayer.Builder(getContext()).build();
+            player.setPlayWhenReady(immediatePlayback);
+            playerView.setPlayer(player);
+
+            Handler handler = new Handler();
+
+            // Needs to be in a new thread because we're accessing AccountManager
+            AccountManager manager = AccountManager.get(getContext());
+            DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "Spexflix"));
+            dataSourceFactory.getDefaultRequestProperties().set("Authorization", "Bearer " + accessToken);
+
+            Uri videoUri = Uri.parse(videoUrl);
+            List<ShowSubtitle> subtitles = video.getSubtitles();
+            int numberOfTracks = 1 + (subtitles == null ? 0 : subtitles.size());
+
+            MediaSource source = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(videoUri);
+
+            if (numberOfTracks > 1) {
+                // TODO: Multiple subtitles and subtitle styling
+                ShowSubtitle subtitle = subtitles.get(0);
+                Format subtitleFormat = Format.createTextSampleFormat(
+                        null,
+                        MimeTypes.TEXT_VTT,
+                        C.SELECTION_FLAG_DEFAULT,
+                        subtitle.getName());
+
+                Uri subtitleUri = Uri.parse(subtitle.getSubtitleFile());
+
+                MediaSource subtitleMediaSource = new SingleSampleMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(subtitleUri, subtitleFormat, C.TIME_UNSET);
+                source = new MergingMediaSource(source, subtitleMediaSource);
+            }
+
+            final MediaSource finalSource = source;
+
+            handler.post(() -> {player.prepare(finalSource);});
+        }
     }
 
     @Override
@@ -118,67 +182,8 @@ public class PlayerFragment extends Fragment {
         info.setText(data.getInformation());
 
         if (data.getVideos() != null && !data.getVideos().isEmpty()) {
-            List<ShowVideo> videos = data.getVideos();
-            ShowVideo video = videos.get(videoId);
-
-            videoTitle.setText(video.getTitle());
-
-            String description = video.getInformation();
-            if (description == null || description.isEmpty()) {
-                videoInfo.setVisibility(View.GONE);
-            } else {
-                videoInfo.setText(description);
-                videoInfo.setVisibility(View.VISIBLE);
-            }
-
-            String videoUrl = video.getVideoFile();
-            if (videoUrl != null) {
-
-                player = new SimpleExoPlayer.Builder(getContext()).build();
-                player.setPlayWhenReady(immediatePlayback);
-                playerView.setPlayer(player);
-
-                Handler handler = new Handler();
-
-                // Needs to be in a new thread because we're accessing AccountManager
-                new Thread(() -> {
-                    try {
-                        AccountManager manager = AccountManager.get(getContext());
-                        String authToken = SpexflixAccountAuthenticator.getAuthToken(manager, handler);
-                        DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "Spexflix"));
-                        dataSourceFactory.getDefaultRequestProperties().set("Authorization", "Basic " + authToken);
-
-                        Uri videoUri = Uri.parse(videoUrl);
-                        List<ShowSubtitle> subtitles = video.getSubtitles();
-                        int numberOfTracks = 1 + (subtitles == null ? 0 : subtitles.size());
-
-                        MediaSource source = new ProgressiveMediaSource.Factory(dataSourceFactory)
-                                .createMediaSource(videoUri);
-
-                        if (numberOfTracks > 1) {
-                            // TODO: Multiple subtitles and subtitle styling
-                            ShowSubtitle subtitle = subtitles.get(0);
-                            Format subtitleFormat = Format.createTextSampleFormat(
-                                    null,
-                                    MimeTypes.TEXT_VTT,
-                                    C.SELECTION_FLAG_DEFAULT,
-                                    subtitle.getName());
-
-                            Uri subtitleUri = Uri.parse(subtitle.getSubtitleFile());
-
-                            MediaSource subtitleMediaSource = new SingleSampleMediaSource.Factory(dataSourceFactory)
-                                .createMediaSource(subtitleUri, subtitleFormat, C.TIME_UNSET);
-                            source = new MergingMediaSource(source, subtitleMediaSource);
-                        }
-
-                        final MediaSource finalSource = source;
-
-                        handler.post(() -> {player.prepare(finalSource);});
-                    } catch (IOException e) {
-                        // TODO: Error handling
-                    }
-                }).start();
-            }
+            AuthStateManager manager = AuthStateManager.getInstance(getContext());
+            manager.getCurrent().performActionWithFreshTokens(mAuthService, this::prepareVideo);
         }
     }
 

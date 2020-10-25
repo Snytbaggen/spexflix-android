@@ -19,7 +19,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import se.liss.spexflix.account.SpexflixAccountAuthenticator;
+//import se.liss.spexflix.account.SpexflixAccountAuthenticator;
 import se.liss.spexflix.data.ShowData;
 import se.liss.spexflix.data.ShowVideo;
 
@@ -28,12 +28,12 @@ public class CastLoader {
         AccountManager accountManager = AccountManager.get(context);
         Handler mainHandler = new Handler(Looper.getMainLooper());
         new Thread(() -> {
-            try {
-                String token = SpexflixAccountAuthenticator.getAuthToken(accountManager, mainHandler);
+            //try {
+                String token = "";//SpexflixAccountAuthenticator.getAuthToken(accountManager, mainHandler);
                 mainHandler.post( () -> buildAndStartCast(castSession, showData, token));
-            } catch (IOException e) {
+            //} catch (IOException e) {
                 // Do nothing
-            }
+            //}
         }).start();
     }
 

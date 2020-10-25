@@ -6,12 +6,14 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import se.liss.spexflix.account.LoginActivity;
+
 public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
     }
 }

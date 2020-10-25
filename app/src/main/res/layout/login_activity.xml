@@ -25,84 +25,20 @@
             android:text="Spexflix"/>
 
         <TextView
-            android:id="@+id/login_username_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_logo"
-            android:layout_marginTop="20dp"
-            android:layout_marginStart="@dimen/horizontal_edge_space"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Användarnamn"/>
-
-        <EditText
-            android:id="@+id/login_username_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_username_title"
-            android:layout_marginStart="@dimen/horizontal_edge_space"
-            android:layout_marginEnd="@dimen/horizontal_edge_space"
-            android:layout_marginTop="8dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:background="@drawable/login_text_field_bg"
-            android:textColor="@color/black"
-            tools:text="Snytbaggen"/>
-
-        <TextView
-            android:id="@+id/login_password_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_username_text"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="@dimen/horizontal_edge_space"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Lösenord"/>
-
-        <EditText
-            android:id="@+id/login_password_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_password_title"
-            android:layout_marginStart="@dimen/horizontal_edge_space"
-            android:layout_marginEnd="@dimen/horizontal_edge_space"
-            android:layout_marginTop="8dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:background="@drawable/login_text_field_bg"
-            android:textColor="@color/black"
-            android:inputType="textPassword"
-            tools:text="Ett lösenord"/>
-
-        <TextView
             android:id="@+id/login_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_password_text"
-            android:layout_marginTop="32dp"
             android:background="@drawable/login_button_bg"
+            android:paddingStart="20dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
+            android:text="Logga in"
             android:textColor="@color/black"
             android:textSize="24sp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="Logga in"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="376dp" />
 
         <TextView
             android:layout_width="0dp"

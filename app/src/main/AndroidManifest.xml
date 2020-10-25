@@ -27,13 +27,15 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".account.SpexflixAccountAuthenticatorService" >
+        <activity android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            tools:node="replace">
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="se.studentspex.spexflix.android"/>
             </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
+        </activity>
 
         <meta-data
             android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"

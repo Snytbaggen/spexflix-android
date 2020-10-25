@@ -1,6 +1,5 @@
 package se.liss.spexflix.utils;
 
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,44 +15,49 @@ import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 
-import java.io.IOException;
+import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.TokenResponse;
+
 import java.io.InputStream;
 
-import se.liss.spexflix.account.SpexflixAccountAuthenticator;
+import se.liss.spexflix.account.AuthStateManager;
 
 public class GlideHeaderLoader extends BaseGlideUrlLoader<String> {
-    private Context context;
     private android.os.Handler handler = new Handler(Looper.getMainLooper());
-    private AccountManager accountManager;
+    private AuthStateManager mAuthStateManager;
+    private AuthorizationService mAuthService;
 
-    protected GlideHeaderLoader(ModelLoader<GlideUrl, InputStream> concreteLoader) {
+    protected GlideHeaderLoader(ModelLoader<GlideUrl, InputStream> concreteLoader, Context context) {
         super(concreteLoader);
+        mAuthStateManager = AuthStateManager.getInstance(context);
+        mAuthService = new AuthorizationService(context);
     }
 
-    protected GlideHeaderLoader(ModelLoader<GlideUrl, InputStream> concreteLoader, @Nullable ModelCache<String, GlideUrl> modelCache) {
-        super(concreteLoader, modelCache);
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
-        accountManager = AccountManager.get(context);
-    }
+    //protected GlideHeaderLoader(ModelLoader<GlideUrl, InputStream> concreteLoader, @Nullable ModelCache<String, GlideUrl> modelCache) {
+    //    super(concreteLoader, modelCache);
+    //}
 
     @Override
     protected String getUrl(String s, int width, int height, Options options) {
         return s;
     }
 
+    private void handleAccessTokenResponse(
+            @Nullable TokenResponse tokenResponse,
+            @Nullable AuthorizationException authException) {
+        mAuthStateManager.updateAfterTokenResponse(tokenResponse, authException);
+    }
+
     @Nullable
     @Override
     protected Headers getHeaders(String s, int width, int height, Options options) {
-        try {
-            String authToken = SpexflixAccountAuthenticator.getAuthToken(accountManager, handler);
-            if (authToken != null)
-                return new LazyHeaders.Builder().addHeader("Authorization", "Basic " + authToken).build();
-        } catch (IOException e) {
-            // Do nothing
+        if (mAuthStateManager.getCurrent().getNeedsTokenRefresh()) {
+            mAuthService.performTokenRequest(mAuthStateManager.getCurrent().createTokenRefreshRequest(), this::handleAccessTokenResponse);
         }
+        String accessToken = mAuthStateManager.getCurrent().getAccessToken();
+        if (accessToken != null)
+            return new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + accessToken).build();
 
         return super.getHeaders(s, width, height, options);
     }
