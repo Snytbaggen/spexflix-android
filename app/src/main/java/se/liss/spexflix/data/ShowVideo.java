@@ -22,6 +22,12 @@ public class ShowVideo {
     }
 
     public String getVideoFile() {
+        // This hack is done to have different authentication types in Apache, they point to the same
+        // locations but with different settings. Should be fixed in a better way, it's not good to
+        // depend on server configuration in the client.
+        if (videoFile != null) {
+            return videoFile.replace("/uploads/", "/oauth20/uploads/");
+        }
         return videoFile;
     }
 
