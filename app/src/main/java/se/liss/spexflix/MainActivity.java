@@ -1,7 +1,9 @@
 package se.liss.spexflix;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -19,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -34,9 +37,18 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigValue;
 import com.google.gson.Gson;
 
+import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationResponse;
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.ClientAuthentication;
+import net.openid.appauth.TokenRequest;
+import net.openid.appauth.TokenResponse;
+
 import java.util.Map;
 
-import se.liss.spexflix.account.SpexflixAccountManager;
+import se.liss.spexflix.account.AuthStateManager;
+import se.liss.spexflix.account.LoginActivity;
 import se.liss.spexflix.cast.CastLoader;
 import se.liss.spexflix.data.ShowData;
 import se.liss.spexflix.data.VersionInformation;
@@ -44,8 +56,8 @@ import se.liss.spexflix.showDetails.PlayerFragment;
 import se.liss.spexflix.showPicker.ShowPickerFragment;
 
 public class MainActivity extends AppCompatActivity implements MainListener {
-    private SpexflixAccountManager accountManager;
 
+    private static final String TAG = "MainActivity";
     private Fragment currentFragment;
     private View fragmentContainer;
 
@@ -58,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements MainListener {
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
+    private AuthStateManager mAuthStateManager;
+    private AuthorizationService mAuthService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,9 +80,8 @@ public class MainActivity extends AppCompatActivity implements MainListener {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
         setContentView(R.layout.activity_main);
-
-        accountManager = SpexflixAccountManager.getInstance(this);
-        accountManager.getCurrentAccount().observe(this, this::checkLogin);
+        mAuthStateManager = AuthStateManager.getInstance(this);
+        mAuthService = new AuthorizationService(this);
 
         rootView = findViewById(R.id.drawer_layout);
         toolbar = findViewById(R.id.toolbar_layout);
@@ -78,7 +92,8 @@ public class MainActivity extends AppCompatActivity implements MainListener {
 
         View signOutButton = findViewById(R.id.sign_out_button);
         signOutButton.setOnClickListener(v -> {
-            accountManager.removeCurrentAccount();
+            //accountManager.removeCurrentAccount();
+            // TODO: sign out
             closeDrawer();
         });
 
@@ -98,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements MainListener {
             showMainFragment();
         } else {
             if (currentFragment instanceof ShowPickerFragment)
-                ((ShowPickerFragment)currentFragment).setListener(this);
+                ((ShowPickerFragment) currentFragment).setListener(this);
 
             FragmentTransaction fragmentTransaction = manager.beginTransaction();
             fragmentTransaction.replace(R.id.main_fragment, currentFragment);
@@ -139,18 +154,93 @@ public class MainActivity extends AppCompatActivity implements MainListener {
         //toolbar = findViewById(R.id.main_toolbar);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mAuthStateManager.getCurrent().isAuthorized()) {
+            return;
+        }
+
+        // the stored AuthState is incomplete, so check if we are currently receiving the result of
+        // the authorization flow from the browser.
+        AuthorizationResponse response = AuthorizationResponse.fromIntent(getIntent());
+        AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
+
+        if (response != null || ex != null) {
+            mAuthStateManager.updateAfterAuthorization(response, ex);
+        }
+
+        if (response != null && response.authorizationCode != null) {
+            // authorization code exchange is required
+            mAuthStateManager.updateAfterAuthorization(response, ex);
+            exchangeAuthorizationCode(response);
+        } else if (ex != null) {
+            //displayNotAuthorized("Authorization flow failed: " + ex.getMessage());
+        } else {
+            //displayNotAuthorized("No authorization state retained - reauthorization required");
+        }
+
+
+    }
+
+    @MainThread
+    private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
+        //displayLoading("Exchanging authorization code");
+        performTokenRequest(
+                authorizationResponse.createTokenExchangeRequest(),
+                this::handleCodeExchangeResponse);
+    }
+
+    @WorkerThread
+    private void handleCodeExchangeResponse(
+            @Nullable TokenResponse tokenResponse,
+            @Nullable AuthorizationException authException) {
+
+        mAuthStateManager.updateAfterTokenResponse(tokenResponse, authException);
+        if (!mAuthStateManager.getCurrent().isAuthorized()) {
+            final String message = "Authorization Code exchange failed"
+                    + ((authException != null) ? authException.error : "");
+
+            // WrongThread inference is incorrect for lambdas
+            //noinspection WrongThread
+            //runOnUiThread(() -> displayNotAuthorized(message));
+        } else {
+            //runOnUiThread(this::displayAuthorized);
+        }
+    }
+
+    @MainThread
+    private void performTokenRequest(
+            TokenRequest request,
+            AuthorizationService.TokenResponseCallback callback) {
+        ClientAuthentication clientAuthentication;
+        try {
+            clientAuthentication = mAuthStateManager.getCurrent().getClientAuthentication();
+        } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
+            Log.d(TAG, "Token request cannot be made, client authentication for the token "
+                    + "endpoint could not be constructed (%s)", ex);
+            //displayNotAuthorized("Client authentication method is unsupported");
+            return;
+        }
+
+        mAuthService.performTokenRequest(
+                request,
+                clientAuthentication,
+                callback);
+    }
+
     private void displayUpdateDialog(String url, String message) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setCancelable(true);
-    builder.setMessage(message != null ? message : "Det har kommit en ny version av appen! Ladda ner den snarast för att få en bättre spexupplevelse");
-    builder.setTitle("Ny version!");
-    builder.setPositiveButton("Ladda ner nu" , (dialog, which) -> {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://haggmyr.se/daniel/spexflix-apk/downloadpage.html"));
-        startActivity(browserIntent);
-        dialog.dismiss();
-    });
-    builder.setNegativeButton("Kanske senare", (dialog, which) -> dialog.dismiss());
-    builder.show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setMessage(message != null ? message : "Det har kommit en ny version av appen! Ladda ner den snarast för att få en bättre spexupplevelse");
+        builder.setTitle("Ny version!");
+        builder.setPositiveButton("Ladda ner nu", (dialog, which) -> {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://haggmyr.se/daniel/spexflix-apk/downloadpage.html"));
+            startActivity(browserIntent);
+            dialog.dismiss();
+        });
+        builder.setNegativeButton("Kanske senare", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
 
     public void calculateBottomPadding() {
@@ -164,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements MainListener {
         fragmentContainer.setPadding(0, 0, 0, bottomPadding);
     }
 
-    public void onSaveInstanceState(@NonNull Bundle outState){
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment);
         if (fragment != null)
             getSupportFragmentManager().putFragment(outState, "currentFragment", fragment);
@@ -273,6 +363,7 @@ public class MainActivity extends AppCompatActivity implements MainListener {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+   /*
     private void checkLogin(Account account) {
         if (account == null) {
             accountManager.addAccount(this);
@@ -282,12 +373,13 @@ public class MainActivity extends AppCompatActivity implements MainListener {
             ((ShowPickerFragment)currentFragment).updateData(true);
         }
     }
+    */
 
     private void showMainFragment() {
         FragmentManager manager = getSupportFragmentManager();
         currentFragment = new ShowPickerFragment();
         FragmentTransaction transaction = manager.beginTransaction();
-        ((ShowPickerFragment)currentFragment).setListener(this);
+        ((ShowPickerFragment) currentFragment).setListener(this);
         transaction.replace(R.id.main_fragment, currentFragment);
         transaction.commit();
     }

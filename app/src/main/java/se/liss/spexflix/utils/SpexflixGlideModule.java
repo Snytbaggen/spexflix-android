@@ -27,48 +27,24 @@ public class SpexflixGlideModule extends AppGlideModule {
 
     @Override
     public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
-        registry.append(String.class, InputStream.class, new GlideHeaderLoaderFactory());
+        registry.append(String.class, InputStream.class, new GlideHeaderLoaderFactory(context));
     }
 
-    static class GlideHeaderLoaderFactory implements ModelLoaderFactory<String, InputStream> {
+    class GlideHeaderLoaderFactory implements ModelLoaderFactory<String, InputStream> {
+        private Context context;
+        GlideHeaderLoaderFactory(Context context) {
+            this.context = context;
+        }
 
         @NonNull
         @Override
         public ModelLoader<String, InputStream> build(@NonNull MultiModelLoaderFactory multiFactory) {
-            return new GlideHeaderLoader(multiFactory.build(GlideUrl.class, InputStream.class));
+            return new GlideHeaderLoader(multiFactory.build(GlideUrl.class, InputStream.class), this.context);
         }
 
         @Override
         public void teardown() {
 
-        }
-    }
-
-    static class GlideHeaderLoader extends BaseGlideUrlLoader<String> {
-
-        protected GlideHeaderLoader(ModelLoader<GlideUrl, InputStream> concreteLoader) {
-            super(concreteLoader);
-        }
-
-        protected GlideHeaderLoader(ModelLoader<GlideUrl, InputStream> concreteLoader, @Nullable ModelCache<String, GlideUrl> modelCache) {
-            super(concreteLoader, modelCache);
-        }
-
-        @Override
-        protected String getUrl(String s, int width, int height, Options options) {
-            return s;
-        }
-
-        @Nullable
-        @Override
-        protected Headers getHeaders(String s, int width, int height, Options options) {
-            // TODO: Account stuff
-            return super.getHeaders(s, width, height, options);}
-        }
-
-        @Override
-        public boolean handles(@NonNull String s) {
-            return true;
         }
     }
 }
